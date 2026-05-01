@@ -6,8 +6,13 @@
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": ["Other", "Machine Learning"],
-  "activationEvents": ["onStartupFinished"],
+  "categories": [
+    "Other",
+    "Machine Learning"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "viewsContainers": {
@@ -29,17 +34,53 @@
       ]
     },
     "commands": [
-      { "command": "sdlc.session.new", "title": "SDLC: New Session", "icon": "$(add)" },
-      { "command": "sdlc.session.open", "title": "SDLC: Open Session" },
-      { "command": "sdlc.session.rename", "title": "SDLC: Rename Session" },
-      { "command": "sdlc.session.delete", "title": "SDLC: Delete Session", "icon": "$(trash)" },
-      { "command": "sdlc.session.export", "title": "SDLC: Export Session", "icon": "$(export)" },
-      { "command": "sdlc.phase.generate", "title": "SDLC: Generate Current Phase" },
-      { "command": "sdlc.phase.approve", "title": "SDLC: Approve Phase" },
-      { "command": "sdlc.phase.revise", "title": "SDLC: Request Revision" },
-      { "command": "sdlc.phase.back", "title": "SDLC: Go Back to Previous Phase" },
-      { "command": "sdlc.config.setApiKey", "title": "SDLC: Set API Key" },
-      { "command": "sdlc.config.clearApiKey", "title": "SDLC: Clear API Key" }
+      {
+        "command": "sdlc.session.new",
+        "title": "SDLC: New Session",
+        "icon": "$(add)"
+      },
+      {
+        "command": "sdlc.session.open",
+        "title": "SDLC: Open Session"
+      },
+      {
+        "command": "sdlc.session.rename",
+        "title": "SDLC: Rename Session"
+      },
+      {
+        "command": "sdlc.session.delete",
+        "title": "SDLC: Delete Session",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "sdlc.session.export",
+        "title": "SDLC: Export Session",
+        "icon": "$(export)"
+      },
+      {
+        "command": "sdlc.phase.generate",
+        "title": "SDLC: Generate Current Phase"
+      },
+      {
+        "command": "sdlc.phase.approve",
+        "title": "SDLC: Approve Phase"
+      },
+      {
+        "command": "sdlc.phase.revise",
+        "title": "SDLC: Request Revision"
+      },
+      {
+        "command": "sdlc.phase.back",
+        "title": "SDLC: Go Back to Previous Phase"
+      },
+      {
+        "command": "sdlc.config.setApiKey",
+        "title": "SDLC: Set API Key"
+      },
+      {
+        "command": "sdlc.config.clearApiKey",
+        "title": "SDLC: Clear API Key"
+      }
     ],
     "menus": {
       "view/title": [
@@ -50,18 +91,61 @@
         }
       ],
       "view/item/context": [
-        { "command": "sdlc.session.rename", "when": "viewItem == session", "group": "1_modify" },
-        { "command": "sdlc.session.export", "when": "viewItem == session", "group": "1_modify" },
-        { "command": "sdlc.session.delete", "when": "viewItem == session", "group": "2_destructive" }
+        {
+          "command": "sdlc.session.rename",
+          "when": "viewItem == session",
+          "group": "1_modify"
+        },
+        {
+          "command": "sdlc.session.export",
+          "when": "viewItem == session",
+          "group": "1_modify"
+        },
+        {
+          "command": "sdlc.session.delete",
+          "when": "viewItem == session",
+          "group": "2_destructive"
+        }
       ]
     },
     "configuration": {
       "title": "SDLC Agent",
       "properties": {
+        "sdlcAgent.provider": {
+          "type": "string",
+          "enum": ["anthropic", "vertex", "gemini"],
+          "enumDescriptions": [
+            "Anthropic direct API (requires sk-ant-... key)",
+            "Claude on Google Cloud Vertex AI (uses gcloud ADC)",
+            "Gemini on Google Cloud Vertex AI (uses gcloud ADC)"
+          ],
+          "default": "anthropic",
+          "description": "LLM provider"
+        },
         "sdlcAgent.model": {
           "type": "string",
           "default": "claude-sonnet-4-6",
-          "description": "Claude model to use for LLM generation"
+          "description": "Model ID for the Anthropic direct API (e.g. claude-sonnet-4-6)"
+        },
+        "sdlcAgent.vertexModel": {
+          "type": "string",
+          "default": "claude-sonnet-4-5@20251101",
+          "description": "Model ID for Claude on Vertex AI (e.g. claude-sonnet-4-5@20251101)"
+        },
+        "sdlcAgent.geminiModel": {
+          "type": "string",
+          "default": "gemini-2.5-flash",
+          "description": "Model ID for Gemini on Vertex AI (e.g. gemini-2.5-flash, gemini-2.5-pro)"
+        },
+        "sdlcAgent.vertexProjectId": {
+          "type": "string",
+          "default": "",
+          "description": "Google Cloud project ID (used by both vertex and gemini providers)"
+        },
+        "sdlcAgent.vertexRegion": {
+          "type": "string",
+          "default": "us-central1",
+          "description": "Google Cloud region (e.g. us-central1 for Gemini, us-east5 for Claude on Vertex)"
         },
         "sdlcAgent.fileBackup.enabled": {
           "type": "boolean",
@@ -100,6 +184,8 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.92.0",
+    "@anthropic-ai/vertex-sdk": "^0.16.0",
+    "@google-cloud/vertexai": "^1.12.0",
     "uuid": "^14.0.0",
     "zod": "^4.4.1"
   },
