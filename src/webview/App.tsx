@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { SDLCSession, PhaseId } from '../shared/types';
+import { SDLCSession, PhaseId, PHASE_ORDER } from '../shared/types';
 import { ExtensionMessage } from '../shared/messages';
 import { postCommand, subscribeToSession } from './store/sessionStore';
 import { PhaseStepper } from './components/PhaseStepper';
@@ -94,6 +94,11 @@ export function App() {
   const phaseStatus = session.phases[phase].status;
   const currentIsGenerating = isGenerating && streamingPhase === phase;
 
+  // The furthest phase still needing work — used to show "Back to X" when browsing approved phases
+  const latestActivePhase = [...PHASE_ORDER].reverse().find(p =>
+    ['active', 'in-progress', 'awaiting-approval'].includes(session.phases[p].status)
+  );
+
   return (
     <div className="app">
       <PhaseStepper session={session} />
@@ -164,6 +169,7 @@ export function App() {
         status={phaseStatus}
         isGenerating={currentIsGenerating}
         onGenerate={() => handleGenerate(phase)}
+        latestActivePhase={latestActivePhase}
       />
     </div>
   );

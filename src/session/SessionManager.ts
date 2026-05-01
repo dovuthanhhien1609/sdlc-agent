@@ -380,15 +380,140 @@ export class SessionManager {
   }
 
   private buildMarkdownExport(session: SDLCSession): string {
-    const lines: string[] = [`# ${session.name}\n`, `Created: ${session.createdAt}\n`];
-    for (const phase of PHASE_ORDER) {
-      const state = session.phases[phase];
-      lines.push(`\n## ${phase.toUpperCase()}\n`);
-      lines.push(`Status: ${state.status}\n`);
-      if (state.document) {
-        lines.push('```json\n' + JSON.stringify(state.document, null, 2) + '\n```\n');
+    const created = new Date(session.createdAt).toLocaleString();
+    const lines: string[] = [
+      `# ${session.name}`,
+      `> Created: ${created}`,
+      '',
+    ];
+
+    // Requirement
+    const req = session.phases.requirement;
+    lines.push('## Requirements');
+    if (req.document) {
+      const d = req.document as import('../shared/types').RequirementDocument;
+      lines.push('', d.summary, '');
+      lines.push('### Functional Requirements');
+      for (const r of d.functional) {
+        lines.push(`- **[${r.id}]** *(${r.priority})* ${r.description}`);
       }
+      if (d.nonFunctional.length) {
+        lines.push('', '### Non-Functional Requirements');
+        for (const r of d.nonFunctional) {
+          lines.push(`- **[${r.id}]** *(${r.category})* ${r.description}`);
+        }
+      }
+      if (d.acceptanceCriteria.length) {
+        lines.push('', '### Acceptance Criteria');
+        for (const c of d.acceptanceCriteria) { lines.push(`- ${c}`); }
+      }
+      if (d.outOfScope.length) {
+        lines.push('', '### Out of Scope');
+        for (const s of d.outOfScope) { lines.push(`- ${s}`); }
+      }
+      const open = d.openQuestions.filter(q => q.status === 'open');
+      if (open.length) {
+        lines.push('', '### Open Questions');
+        for (const q of open) { lines.push(`- **[${q.id}]** ${q.question}`); }
+      }
+    } else {
+      lines.push('', '_Not completed._');
     }
+
+    // Design
+    const design = session.phases.design;
+    lines.push('', '---', '', '## Design');
+    if (design.document) {
+      const d = design.document as import('../shared/types').DesignDocument;
+      lines.push('', d.architectureOverview);
+      if (d.components.length) {
+        lines.push('', '### Components');
+        for (const c of d.components) {
+          lines.push(``, `#### ${c.name}`, c.responsibility);
+          if (c.interfaces.length) {
+            lines.push('Interfaces: ' + c.interfaces.join(', '));
+          }
+        }
+      }
+      if (d.apiContracts.length) {
+        lines.push('', '### API Contracts');
+        for (const a of d.apiContracts) {
+          lines.push(`- \`${a.method} ${a.endpoint}\` — Auth: ${a.auth}`);
+        }
+      }
+      if (d.sequenceFlows.length) {
+        lines.push('', '### Sequence Flows');
+        for (const f of d.sequenceFlows) {
+          lines.push('', `#### ${f.title}`, '```mermaid', f.diagram, '```');
+        }
+      }
+      if (d.decisionsLog.length) {
+        lines.push('', '### Decision Log');
+        for (const dec of d.decisionsLog) {
+          lines.push(``, `**${dec.decision}**`, dec.rationale);
+        }
+      }
+    } else {
+      lines.push('', '_Not completed._');
+    }
+
+    // Task Breakdown
+    const tb = session.phases['task-breakdown'];
+    lines.push('', '---', '', '## Tasks');
+    if (tb.document) {
+      const d = tb.document as import('../shared/types').TaskList;
+      const byStatus = (s: string) => d.tasks.filter(t => t.status === s);
+      const renderTasks = (tasks: import('../shared/types').Task[]) => {
+        for (const t of tasks) {
+          const check = t.status === 'done' ? '[x]' : '[ ]';
+          lines.push(`- ${check} **[${t.id}]** ${t.title} *(${t.complexity} · ${t.category})*`);
+        }
+      };
+      renderTasks(d.tasks);
+    } else {
+      lines.push('', '_Not completed._');
+    }
+
+    // Testing
+    const testing = session.phases.testing;
+    lines.push('', '---', '', '## Test Plan');
+    if (testing.document) {
+      const d = testing.document as import('../shared/types').TestPlan;
+      lines.push('', d.strategy, '');
+      lines.push('| ID | Type | Title | Expected Result | Status |');
+      lines.push('|---|---|---|---|---|');
+      for (const tc of d.testCases) {
+        lines.push(`| ${tc.id} | ${tc.type} | ${tc.title} | ${tc.expectedResult} | ${tc.status} |`);
+      }
+    } else {
+      lines.push('', '_Not completed._');
+    }
+
+    // Review
+    const review = session.phases.review;
+    lines.push('', '---', '', '## Review');
+    if (review.document) {
+      const d = review.document as import('../shared/types').ReviewReport;
+      const badge = d.recommendation === 'ship' ? '✅ Ready to ship' : '⚠️ Needs revision';
+      lines.push('', badge);
+      if (d.revisitReason) { lines.push('', d.revisitReason); }
+      if (d.gaps.length) {
+        lines.push('', '### Gaps');
+        for (const g of d.gaps) {
+          lines.push(`- **[${g.severity}]** ${g.description}`);
+        }
+      }
+      lines.push('', '### Requirement Coverage');
+      lines.push('| Requirement | Coverage |');
+      lines.push('|---|---|');
+      for (const item of d.requirementCoverage) {
+        lines.push(`| ${item.requirementId} | ${item.coverageStatus} |`);
+      }
+    } else {
+      lines.push('', '_Not completed._');
+    }
+
+    lines.push('');
     return lines.join('\n');
   }
 }

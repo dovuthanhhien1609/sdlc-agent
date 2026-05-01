@@ -1,5 +1,5 @@
 import React from 'react';
-import { PhaseId, PhaseStatus } from '../../shared/types';
+import { PhaseId, PhaseStatus, PHASE_LABELS } from '../../shared/types';
 import { postCommand } from '../store/sessionStore';
 
 interface Props {
@@ -7,9 +7,10 @@ interface Props {
   status: PhaseStatus;
   isGenerating: boolean;
   onGenerate?: () => void;
+  latestActivePhase?: PhaseId;
 }
 
-export function ActionBar({ phase, status, isGenerating, onGenerate }: Props) {
+export function ActionBar({ phase, status, isGenerating, onGenerate, latestActivePhase }: Props) {
   if (status === 'locked') {
     return (
       <div className="action-bar">
@@ -81,12 +82,22 @@ export function ActionBar({ phase, status, isGenerating, onGenerate }: Props) {
       )}
 
       {status === 'approved' && phase !== 'review' && (
-        <button
-          className="btn-secondary"
-          onClick={() => postCommand({ type: 'RESTART_FROM_PHASE', phase })}
-        >
-          Re-open Phase
-        </button>
+        <>
+          {latestActivePhase && latestActivePhase !== phase && (
+            <button
+              className="btn-primary"
+              onClick={() => postCommand({ type: 'NAVIGATE_PHASE', phase: latestActivePhase })}
+            >
+              Back to {PHASE_LABELS[latestActivePhase]} →
+            </button>
+          )}
+          <button
+            className="btn-secondary"
+            onClick={() => postCommand({ type: 'RESTART_FROM_PHASE', phase })}
+          >
+            Re-open Phase
+          </button>
+        </>
       )}
     </div>
   );
