@@ -7,7 +7,7 @@ import type {
 
 export type WebViewCommand =
   | { type: 'WEBVIEW_READY' }
-  | { type: 'GENERATE_PHASE'; phase: PhaseId; taskId?: string }
+  | { type: 'GENERATE_PHASE'; phase: PhaseId; taskId?: string; input?: string }
   | { type: 'APPROVE_PHASE'; phase: PhaseId }
   | { type: 'REVISE_PHASE'; phase: PhaseId }
   | { type: 'UPDATE_DOCUMENT'; phase: PhaseId; patch: Record<string, unknown> }

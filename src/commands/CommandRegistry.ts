@@ -153,7 +153,7 @@ async function dispatchWebViewCommand(
       break;
     }
     case 'GENERATE_PHASE':
-      await manager.generatePhase(sessionId, cmd.phase, cmd.taskId);
+      await manager.generatePhase(sessionId, cmd.phase, cmd.taskId, cmd.input);
       break;
     case 'APPROVE_PHASE':
       manager.approvePhase(sessionId, cmd.phase);

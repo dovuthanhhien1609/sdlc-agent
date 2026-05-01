@@ -74,10 +74,11 @@ export function App() {
   const handleGenerate = useCallback((phase: PhaseId) => {
     setStreamBuffer('');
     setError(null);
-    if (phase === 'requirement') {
-      postCommand({ type: 'UPDATE_DOCUMENT', phase: 'requirement', patch: { _input: requirementInput } });
-    }
-    postCommand({ type: 'GENERATE_PHASE', phase });
+    postCommand({
+      type: 'GENERATE_PHASE',
+      phase,
+      ...(phase === 'requirement' ? { input: requirementInput } : {}),
+    });
   }, [requirementInput]);
 
   if (!session) {

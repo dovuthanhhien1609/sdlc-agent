@@ -14,7 +14,8 @@ interface Props {
 
 export function RequirementPhase({ session, streamBuffer, isGenerating, input, onInputChange, onGenerate }: Props) {
   const phase = session.phases.requirement;
-  const doc = phase.document as RequirementDocument | undefined;
+  const rawDoc = phase.document as Record<string, unknown> | undefined;
+  const doc = (rawDoc && Array.isArray(rawDoc.functional)) ? rawDoc as unknown as RequirementDocument : undefined;
   const isReadOnly = phase.status === 'approved';
   // Show loading state as soon as the extension marks the phase in-progress,
   // even before the first LLM_CHUNK arrives (isGenerating lags by one chunk).

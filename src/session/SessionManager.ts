@@ -96,7 +96,7 @@ export class SessionManager {
     this.mutate(session, s => { s.activeTaskId = taskId; });
   }
 
-  async generatePhase(sessionId: string, phase: PhaseId, taskId?: string): Promise<void> {
+  async generatePhase(sessionId: string, phase: PhaseId, taskId?: string, input?: string): Promise<void> {
     const session = this.require(sessionId);
     assertCanGenerate(session, phase);
 
@@ -109,7 +109,7 @@ export class SessionManager {
 
     try {
       const stack = await this.techStack.detect();
-      const messages = this.buildMessages(session, phase, stack, taskId);
+      const messages = this.buildMessages(session, phase, stack, taskId, input);
 
       let fullText = '';
       await this.llm.stream(
@@ -346,11 +346,12 @@ export class SessionManager {
     phase: PhaseId,
     stack: string,
     taskId?: string,
+    input?: string,
   ): { role: 'user' | 'assistant'; content: string }[] {
     switch (phase) {
       case 'requirement': {
         const reqDoc = session.phases.requirement.document as (Record<string, unknown> | undefined);
-        const userInput = (reqDoc?._input as string | undefined) ?? '';
+        const userInput = input ?? (reqDoc?._input as string | undefined) ?? '';
         return this.promptBuilder.buildRequirementPrompt(userInput);
       }
       case 'design': return this.promptBuilder.buildDesignPrompt(session, stack);
