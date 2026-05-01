@@ -1,0 +1,123 @@
+{
+  "name": "sdlc-agent",
+  "displayName": "SDLC Agent",
+  "description": "AI-powered engineering workflow: guided SDLC from requirement to review",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other", "Machine Learning"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "sdlc-agent",
+          "title": "SDLC Agent",
+          "icon": "media/sdlc-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "sdlc-agent": [
+        {
+          "id": "sdlc.sessions",
+          "name": "Sessions",
+          "type": "tree"
+        }
+      ]
+    },
+    "commands": [
+      { "command": "sdlc.session.new", "title": "SDLC: New Session", "icon": "$(add)" },
+      { "command": "sdlc.session.open", "title": "SDLC: Open Session" },
+      { "command": "sdlc.session.rename", "title": "SDLC: Rename Session" },
+      { "command": "sdlc.session.delete", "title": "SDLC: Delete Session", "icon": "$(trash)" },
+      { "command": "sdlc.session.export", "title": "SDLC: Export Session", "icon": "$(export)" },
+      { "command": "sdlc.phase.generate", "title": "SDLC: Generate Current Phase" },
+      { "command": "sdlc.phase.approve", "title": "SDLC: Approve Phase" },
+      { "command": "sdlc.phase.revise", "title": "SDLC: Request Revision" },
+      { "command": "sdlc.phase.back", "title": "SDLC: Go Back to Previous Phase" },
+      { "command": "sdlc.config.setApiKey", "title": "SDLC: Set API Key" },
+      { "command": "sdlc.config.clearApiKey", "title": "SDLC: Clear API Key" }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "sdlc.session.new",
+          "when": "view == sdlc.sessions",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        { "command": "sdlc.session.rename", "when": "viewItem == session", "group": "1_modify" },
+        { "command": "sdlc.session.export", "when": "viewItem == session", "group": "1_modify" },
+        { "command": "sdlc.session.delete", "when": "viewItem == session", "group": "2_destructive" }
+      ]
+    },
+    "configuration": {
+      "title": "SDLC Agent",
+      "properties": {
+        "sdlcAgent.model": {
+          "type": "string",
+          "default": "claude-sonnet-4-6",
+          "description": "Claude model to use for LLM generation"
+        },
+        "sdlcAgent.fileBackup.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Write session files to .sdlc/ in the workspace root"
+        },
+        "sdlcAgent.maxTokenBudget": {
+          "type": "number",
+          "default": 100000,
+          "description": "Maximum token budget for accumulated phase context"
+        }
+      }
+    },
+    "keybindings": [
+      {
+        "command": "sdlc.session.new",
+        "key": "ctrl+shift+s",
+        "mac": "cmd+shift+s",
+        "when": "!editorTextFocus"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run check-types && npm run lint && node esbuild.js",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "package": "npm run check-types && npm run lint && node esbuild.js --production",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.92.0",
+    "uuid": "^14.0.0",
+    "zod": "^4.4.1"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@types/uuid": "^10.0.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
+    "esbuild": "^0.27.3",
+    "eslint": "^9.39.3",
+    "npm-run-all": "^4.1.5",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.56.1"
+  }
+}
