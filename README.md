@@ -6,6 +6,12 @@ An AI-powered engineering workflow extension for VS Code that guides developers 
 
 ---
 
+## Demo
+
+[![Watch the demo](https://img.youtube.com/vi/-Z3vj_H2C3w/maxresdefault.jpg)](https://youtu.be/-Z3vj_H2C3w)
+
+---
+
 ## Why SDLC Agent?
 
 Developers routinely jump from vague requirements directly to code. The result is predictable: rework when requirements are misunderstood, architecture decisions made ad hoc mid-implementation, and tests written as an afterthought.
